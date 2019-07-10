@@ -3,12 +3,16 @@
  */
 package com.springboot.apigenerator.model;
 
+ 
+
 import java.util.UUID;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
+
+import com.datastax.driver.core.utils.UUIDs;
 
 import lombok.Data;
 
@@ -24,11 +28,11 @@ public class ProjectDomain {
 	private UUID id;
 	
 //	@PrimaryKeyColumn(name="project_name",ordinal=0,type=PrimaryKeyType.PARTITIONED)
-	@NotNull(message="Project name cannot be empty")
+	@NotBlank(message="Project name cannot be empty")
 	private String projectName;	
 	
 //	@PrimaryKeyColumn(name="domain_name",ordinal=0,type=PrimaryKeyType.CLUSTERED)
-	@NotNull(message="Domain name cannot be empty")
+	@NotBlank(message="Domain name cannot be empty")
 	private String domainName;
 	
 	public ProjectDomain() {};
@@ -37,5 +41,6 @@ public class ProjectDomain {
 		super();		 
 		this.projectName = project_name;
 		this.domainName = domain_name;
+		this.id = UUIDs.timeBased();
 	};
 }
