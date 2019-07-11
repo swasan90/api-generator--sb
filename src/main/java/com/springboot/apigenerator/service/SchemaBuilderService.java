@@ -1,9 +1,8 @@
 /**
- * 
+ * Interface to define schema builder methods.
  */
 package com.springboot.apigenerator.service;
 
-import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.SchemaBuilder;
 
 /**
@@ -12,6 +11,7 @@ import com.springboot.apigenerator.model.SchemaBuilder;
  */
 public interface SchemaBuilderService {
 	
-	void createSchemaForDomain(SchemaBuilder schema) throws EntityFoundException;
+	//Function declaration to create schema for dynamic domain
+	boolean createSchemaForDomain(SchemaBuilder schema);
 
 }
