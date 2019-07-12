@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ResponseMessage;
 import com.springboot.apigenerator.model.SchemaBuilder;
 import com.springboot.apigenerator.service.SchemaBuilderService;
