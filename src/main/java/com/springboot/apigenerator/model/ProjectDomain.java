@@ -35,12 +35,18 @@ public class ProjectDomain {
 	@NotBlank(message="Domain name cannot be empty")
 	private String domainName;
 	
+	private String methodType;
+	
+	private String endPointUrl;
+	
+	private String endPointName;
+	
 	public ProjectDomain() {};
 	
 	public ProjectDomain(String project_name,String domain_name) {
 		super();		 
 		this.projectName = project_name;
 		this.domainName = domain_name;
-		this.id = UUIDs.timeBased();
+		this.id = UUIDs.timeBased();	
 	};
 }
