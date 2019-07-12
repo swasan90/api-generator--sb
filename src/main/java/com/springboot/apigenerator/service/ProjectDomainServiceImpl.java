@@ -1,5 +1,9 @@
 package com.springboot.apigenerator.service;
 
+import java.util.Map;
+
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,22 +16,23 @@ import com.springboot.apigenerator.repository.ProjectDomainRepository;
 
 @Service("projectService")
 public class ProjectDomainServiceImpl implements ProjectDomainService {
-	
+
 	private Logger logger = LoggerFactory.getLogger(ProjectDomainServiceImpl.class);
-	
+
 	@Autowired
 	private ProjectDomainRepository projectRepo;
-	
+
 	@Override
 	public boolean createProjectDomain(ProjectDomain projectDomain) throws EntityFoundException {
-		ProjectDomain project = projectRepo.findByProjectNameAndDomainName(projectDomain.getProjectName(), projectDomain.getDomainName());
+		ProjectDomain project = projectRepo.findByProjectNameAndDomainName(projectDomain.getProjectName(),
+				projectDomain.getDomainName());
 		try {
-			if(project ==null) {
-				ProjectDomain proj = new ProjectDomain(projectDomain.getProjectName(),projectDomain.getDomainName());
-				projectRepo.save(proj);
+			if (project == null) {
+				ProjectDomain proj = new ProjectDomain(projectDomain.getProjectName(), projectDomain.getDomainName());
+				constructEndPointsMap(proj);
 				logger.info("Created Project and domain");
 				return true;
-			}else {
+			} else {
 				logger.error("Unable to create project and domain with the given name");
 				return false;
 			}
@@ -35,7 +40,73 @@ public class ProjectDomainServiceImpl implements ProjectDomainService {
 			logger.error("Catching Exception " + e.getMessage());
 			throw new EntityFoundException(e.getMessage());
 		}
-		 
+
+	}
+
+	/**
+	 * Function to construct endpoints in multivaluedmap.
+	 * 
+	 * @param proj
+	 */
+	private void constructEndPointsMap(ProjectDomain proj) {
+		logger.info("creating map for http methods and endpoints");
+		MultiValuedMap<String, String> map = new ArrayListValuedHashMap<>();
+		map.put("GET", "apigenerator/" + proj.getProjectName() + "/" + proj.getDomainName());
+		map.put("GET", "apigenerator/" + proj.getProjectName() + "/" + proj.getDomainName() + "/" + proj.getId());
+		map.put("POST", "apigenerator/" + proj.getProjectName() + "/" + proj.getDomainName());
+		map.put("POST", "apigenerator/" + proj.getProjectName() + "/" + proj.getDomainName() + "/" + proj.getId());
+		map.put("DELETE", "apigenerator/" + proj.getProjectName() + "/" + proj.getDomainName() + "/" + proj.getId());
+		logger.info("Created map. Rerouting call to save entity");
+		processRecord(map, proj);
+	}
+
+	/**
+	 * Function to create record in project domain table.
+	 * 
+	 * @param map
+	 * @param proj
+	 */
+	private void processRecord(MultiValuedMap<String, String> map, ProjectDomain proj) {
+		logger.info("Entering map iteration..Persisting data about to start");
+		for (Map.Entry<String, String> entry : map.entries()) {
+			//Creating new object for every loop.
+			ProjectDomain projObj = new ProjectDomain(proj.getProjectName(), proj.getDomainName());
+			
+			//Setters
+			projObj.setMethodType(entry.getKey());
+			projObj.setEndPointUrl(entry.getValue());
+			String endPointName = getEndPointName(entry,proj);
+			projObj.setEndPointName(endPointName);
+			
+			//Persisting data
+			projectRepo.save(projObj);
+		}
+		logger.info("Persisting data completed..");
+	}
+	
+	/**
+	 * Function to get endpoint name based on the method type and endpoint.
+	 * @param entry
+	 * @param proj
+	 * @return
+	 */
+	private String getEndPointName(Map.Entry<String, String> entry, ProjectDomain proj) {
+		switch (entry.getKey()) {
+		case "DELETE":
+			return proj.getDomainName().concat(".delete");
+		case "GET":
+			if (entry.getValue().contains("-")) {
+				return proj.getDomainName().concat(".show");
+			}
+			return proj.getDomainName().concat(".list");
+		case "POST":
+			if (entry.getValue().contains("-")) {
+				return proj.getDomainName().concat(".update");
+			}
+			return proj.getDomainName().concat(".post");
+		default:
+			return "Invalid method type";
+		}
 	}
 
 }
