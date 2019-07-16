@@ -90,7 +90,7 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	@GetMapping(value = "/{projectName}/{domainName}/{domainId}", produces = "application/json", consumes = "application/json")
+	@GetMapping(value = "/{projectName}/{domainName}/{domainId}", produces = "application/json")
 	public ResponseEntity<ResponseMessage> showRecord(@PathVariable(name ="projectName") String projName, @PathVariable String domainName,
 			@PathVariable UUID domainId) throws JsonProcessingException {
 		List<Map<String, Object>> result = httpRequestService.getRecordByID(projName, domainName, domainId);
