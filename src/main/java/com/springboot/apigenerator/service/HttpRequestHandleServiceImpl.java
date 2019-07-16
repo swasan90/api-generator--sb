@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,6 +33,8 @@ import com.springboot.apigenerator.repository.ProjectDomainRepository;
  */
 @Service("httpRequestService")
 public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
+
+	private Logger logger = LoggerFactory.getLogger(HttpRequestHandleServiceImpl.class);
 
 	@Autowired
 	private ProjectDomainRepository projRepo;
@@ -61,6 +65,7 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 	@Override
 	public boolean insertRecord(RequestPayload payload, String projectName, String domainName) throws Exception {
 		ProjectDomain proj = projRepo.findByProjectNameAndDomainName(projectName, domainName);
+		logger.info("Entering try catch block");
 		try {
 			if (proj != null) {
 				payload.setProjectId(proj.getId());
@@ -98,10 +103,11 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 	 * 
 	 * @param projectName,domainName,domainId
 	 * @return boolean
-	 * @throws EntityFoundException 
+	 * @throws EntityFoundException
 	 */
 	@Override
-	public boolean updateRecord(RequestPayload payload, String projectName, String domainName, UUID domainId) throws EntityFoundException {
+	public boolean updateRecord(RequestPayload payload, String projectName, String domainName, UUID domainId)
+			throws EntityFoundException {
 		ProjectDomain proj = projRepo.findByProjectNameAndDomainName(projectName, domainName);
 		try {
 			Where where = findById(domainId, domainName);
@@ -114,11 +120,11 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 				update.where(QueryBuilder.eq("id", domainId)).and(QueryBuilder.eq("project_id", proj.getId()));
 				return cassandraTemplate.getCqlOperations().execute(update);
 			}
-		}catch(DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new EntityFoundException(e.getMessage());
 		}
 		return false;
-		
+
 	}
 
 	/**
@@ -142,11 +148,11 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 			Where where = findById(domainId, domainName);
 			boolean isEmpty = cassandraTemplate.getCqlOperations().queryForList(where).isEmpty();
 			if (proj != null && !isEmpty) {
-				com.datastax.driver.core.querybuilder.Delete.Where delete = QueryBuilder.delete().from(domainName).where(QueryBuilder.eq("id", domainId))
-						.and(QueryBuilder.eq("project_id", proj.getId()));
+				com.datastax.driver.core.querybuilder.Delete.Where delete = QueryBuilder.delete().from(domainName)
+						.where(QueryBuilder.eq("id", domainId)).and(QueryBuilder.eq("project_id", proj.getId()));
 				return cassandraTemplate.getCqlOperations().execute(delete);
 			}
-		}catch(DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new EntityFoundException(e.getMessage());
 		}
 		return false;
