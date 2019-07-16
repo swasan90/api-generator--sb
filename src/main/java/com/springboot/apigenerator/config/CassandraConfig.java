@@ -66,6 +66,7 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
 	@Override
 	public SchemaAction getSchemaAction() {
 		return SchemaAction.CREATE_IF_NOT_EXISTS;
+		//return SchemaAction.RECREATE_DROP_UNUSED;
 	}
 	
 	@Bean
@@ -81,5 +82,5 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     @Override
     public String[] getEntityBasePackages() {
         return new String[] { "com.springboot.apigenerator.model" };
-    }
+    } 
 }
