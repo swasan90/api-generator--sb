@@ -3,7 +3,7 @@
  */
 package com.springboot.apigenerator.service;
 
-import com.springboot.apigenerator.model.SchemaBuilder;
+import com.springboot.apigenerator.model.SchemaGenerator;
 
 /**
  * @author swathy
@@ -12,6 +12,6 @@ import com.springboot.apigenerator.model.SchemaBuilder;
 public interface SchemaBuilderService {
 	
 	//Function declaration to create schema for dynamic domain
-	boolean createSchemaForDomain(SchemaBuilder schema);
+	boolean createSchemaForDomain(SchemaGenerator schema);
 
 }
