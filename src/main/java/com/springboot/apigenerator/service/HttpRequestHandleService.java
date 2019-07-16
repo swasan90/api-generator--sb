@@ -13,5 +13,7 @@ public interface HttpRequestHandleService  {
 	boolean insertRecord(RequestPayload payload,String projectName,String domainName) throws Exception;
 	
 	List<Map<String,Object>> getRecordByID(String project_name,String domain_name,UUID id);
+	
+	boolean updateRecord(RequestPayload payload,String projectName,String domainName,UUID domainId);
 
 }

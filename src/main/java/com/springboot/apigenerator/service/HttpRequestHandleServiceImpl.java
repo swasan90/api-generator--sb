@@ -3,12 +3,13 @@
  */
 package com.springboot.apigenerator.service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.querybuilder.Select.Where;
+import com.datastax.driver.core.querybuilder.Update;
 import com.springboot.apigenerator.model.ProjectDomain;
 import com.springboot.apigenerator.model.RequestPayload;
 import com.springboot.apigenerator.repository.ProjectDomainRepository;
@@ -34,6 +36,9 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 
 	@Autowired
 	private CassandraOperations cassandraTemplate;
+
+	@Value("${cassandra.keyspace}")
+	private String keySpaceName;
 
 	/**
 	 * Function to list all the records from the given table.
@@ -69,20 +74,59 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 		}
 
 	}
-
+	
+	/**
+	 * Function to get record by id.
+	 * @param project_name,domain_name,id
+	 * @return List<Map<String,Object>>
+	 */
 	@Override
 	public List<Map<String, Object>> getRecordByID(String project_name, String domain_name, UUID id) {
 		ProjectDomain project = projRepo.findByProjectNameAndDomainName(project_name, domain_name);
-		if(project !=null) {
-			Clause clause = QueryBuilder.eq("id",id);
-			Where where = QueryBuilder.select().from(domain_name).where(clause);
-			System.out.println(where);
+		if (project != null) {
+			Where where = findById(id, domain_name);
 			return cassandraTemplate.getCqlOperations().queryForList(where);
 		}
 		return null;
-		 
+
 	}
 	
+	/**
+	 * Function to update the record for the given table.
+	 * @param projectName,domainName,domainId
+	 * @return boolean
+	 */
+	@Override
+	public boolean updateRecord(RequestPayload payload, String projectName, String domainName, UUID domainId) {
+		ProjectDomain proj = projRepo.findByProjectNameAndDomainName(projectName, domainName);
+		Where where = findById(domainId, domainName);
+		boolean isEmpty = cassandraTemplate.getCqlOperations().queryForList(where).isEmpty();
+		System.out.println(isEmpty);
+		if (proj != null && !isEmpty) {
+			Update update = QueryBuilder.update(keySpaceName, domainName);
+			for (Entry<String, Object> entry : payload.attributes.entrySet()) {
+				update.with().and(QueryBuilder.set(entry.getKey(), entry.getValue()));
+
+			}
+			update.where(QueryBuilder.eq("id", domainId)).and(QueryBuilder.eq("project_id", proj.getId()));
+			return cassandraTemplate.getCqlOperations().execute(update);
+
+		}
+
+		return false;
+	}
 	
+	/**
+	 * Function to get where query by id. 
+	 * @param id
+	 * @param domain_name
+	 * @return
+	 */
+	private Where findById(UUID id, String domain_name) {
+		Clause clause = QueryBuilder.eq("id", id);
+		Where where = QueryBuilder.select().from(domain_name).where(clause);
+		return where;
+
+	}
 
 }
