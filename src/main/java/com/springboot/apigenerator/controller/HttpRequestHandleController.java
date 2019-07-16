@@ -55,7 +55,7 @@ public class HttpRequestHandleController {
 			@PathVariable String domainName) throws JsonProcessingException {
 		List<Map<String, Object>> result = httpRequestService.listAll(projectName, domainName);
 
-		return new ResponseEntity<ResponseMessage>(this.res.setMessage(listmap_to_json_string(result), true),
+		return new ResponseEntity<ResponseMessage>(this.res.setMessage(listmapToJsonString(result), true),
 				HttpStatus.OK);
 
 	}
@@ -94,7 +94,7 @@ public class HttpRequestHandleController {
 	public ResponseEntity<ResponseMessage> showRecord(@PathVariable(name ="projectName") String projName, @PathVariable String domainName,
 			@PathVariable UUID domainId) throws JsonProcessingException {
 		List<Map<String, Object>> result = httpRequestService.getRecordByID(projName, domainName, domainId);
-		return new ResponseEntity<ResponseMessage>(this.res.setMessage(listmap_to_json_string(result), true),
+		return new ResponseEntity<ResponseMessage>(this.res.setMessage(listmapToJsonString(result), true),
 				HttpStatus.OK);
 	}
 
@@ -105,7 +105,7 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	private String listmap_to_json_string(List<Map<String, Object>> list) throws JsonProcessingException {
+	private String listmapToJsonString(List<Map<String, Object>> list) throws JsonProcessingException {
 		JSONArray json_arr = new JSONArray();
 		if (list != null) {
 			for (Map<String, Object> map : list) {
@@ -124,6 +124,6 @@ public class HttpRequestHandleController {
 			}
 		}
 		return json_arr.toString();
-	}
+	} 
 
 }
