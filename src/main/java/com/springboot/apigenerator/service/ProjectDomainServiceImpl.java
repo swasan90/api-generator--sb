@@ -9,9 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.springboot.apigenerator.exceptions.EntityFoundException;
+import com.springboot.apigenerator.model.ApiEndPoints;
 import com.springboot.apigenerator.model.ProjectDomain;
+import com.springboot.apigenerator.repository.ApiEndPointsRepository;
 import com.springboot.apigenerator.repository.ProjectDomainRepository;
 
 @Service("projectService")
@@ -21,16 +24,22 @@ public class ProjectDomainServiceImpl implements ProjectDomainService {
 
 	@Autowired
 	private ProjectDomainRepository projectRepo;
+	
+	@Autowired
+	private ApiEndPointsRepository apiRepo;
 
 	@Override
+	@Transactional
 	public boolean createProjectDomain(ProjectDomain projectDomain) throws EntityFoundException {
 		ProjectDomain project = projectRepo.findByProjectNameAndDomainName(projectDomain.getProjectName(),
 				projectDomain.getDomainName());
 		try {
 			if (project == null) {
 				ProjectDomain proj = new ProjectDomain(projectDomain.getProjectName(), projectDomain.getDomainName());
-				constructEndPointsMap(proj);
+				projectRepo.save(proj);
 				logger.info("Created Project and domain");
+				
+				constructEndPointsMap(proj);
 				return true;
 			} else {
 				logger.error("Unable to create project and domain with the given name");
@@ -70,16 +79,16 @@ public class ProjectDomainServiceImpl implements ProjectDomainService {
 		logger.info("Entering map iteration..Persisting data about to start");
 		for (Map.Entry<String, String> entry : map.entries()) {
 			//Creating new object for every loop.
-			ProjectDomain projObj = new ProjectDomain(proj.getProjectName(), proj.getDomainName());
+			ApiEndPoints endPoints = new ApiEndPoints();
 			
 			//Setters
-			projObj.setMethodType(entry.getKey());
-			projObj.setEndPointUrl(entry.getValue());
-			String endPointName = getEndPointName(entry,proj);
-			projObj.setEndPointName(endPointName);
+			endPoints.setProjectId(proj.getId());			
+			endPoints.setMethodType(entry.getKey());
+			endPoints.setEndPointUrl(entry.getValue());		
+			endPoints.setEndPointName(getEndPointName(entry,proj));
 			
 			//Persisting data
-			projectRepo.save(projObj);
+			apiRepo.save(endPoints);
 		}
 		logger.info("Persisting data completed..");
 	}
