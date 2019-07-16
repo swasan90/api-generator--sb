@@ -20,6 +20,7 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.querybuilder.Select.Where;
 import com.datastax.driver.core.querybuilder.Update;
+import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ProjectDomain;
 import com.springboot.apigenerator.model.RequestPayload;
 import com.springboot.apigenerator.repository.ProjectDomainRepository;
@@ -74,9 +75,10 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 		}
 
 	}
-	
+
 	/**
 	 * Function to get record by id.
+	 * 
 	 * @param project_name,domain_name,id
 	 * @return List<Map<String,Object>>
 	 */
@@ -90,34 +92,38 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 		return null;
 
 	}
-	
+
 	/**
 	 * Function to update the record for the given table.
+	 * 
 	 * @param projectName,domainName,domainId
 	 * @return boolean
+	 * @throws EntityFoundException 
 	 */
 	@Override
-	public boolean updateRecord(RequestPayload payload, String projectName, String domainName, UUID domainId) {
+	public boolean updateRecord(RequestPayload payload, String projectName, String domainName, UUID domainId) throws EntityFoundException {
 		ProjectDomain proj = projRepo.findByProjectNameAndDomainName(projectName, domainName);
-		Where where = findById(domainId, domainName);
-		boolean isEmpty = cassandraTemplate.getCqlOperations().queryForList(where).isEmpty();
-		System.out.println(isEmpty);
-		if (proj != null && !isEmpty) {
-			Update update = QueryBuilder.update(keySpaceName, domainName);
-			for (Entry<String, Object> entry : payload.attributes.entrySet()) {
-				update.with().and(QueryBuilder.set(entry.getKey(), entry.getValue()));
-
+		try {
+			Where where = findById(domainId, domainName);
+			boolean isEmpty = cassandraTemplate.getCqlOperations().queryForList(where).isEmpty();
+			if (proj != null && !isEmpty) {
+				Update update = QueryBuilder.update(keySpaceName, domainName);
+				for (Entry<String, Object> entry : payload.attributes.entrySet()) {
+					update.with().and(QueryBuilder.set(entry.getKey(), entry.getValue()));
+				}
+				update.where(QueryBuilder.eq("id", domainId)).and(QueryBuilder.eq("project_id", proj.getId()));
+				return cassandraTemplate.getCqlOperations().execute(update);
 			}
-			update.where(QueryBuilder.eq("id", domainId)).and(QueryBuilder.eq("project_id", proj.getId()));
-			return cassandraTemplate.getCqlOperations().execute(update);
-
+		}catch(DataIntegrityViolationException e) {
+			throw new EntityFoundException(e.getMessage());
 		}
-
 		return false;
+		
 	}
-	
+
 	/**
-	 * Function to get where query by id. 
+	 * Function to get where query by id.
+	 * 
 	 * @param id
 	 * @param domain_name
 	 * @return
@@ -126,6 +132,24 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 		Clause clause = QueryBuilder.eq("id", id);
 		Where where = QueryBuilder.select().from(domain_name).where(clause);
 		return where;
+
+	}
+
+	@Override
+	public boolean deleteRecord(String projectName, String domainName, UUID domainId) throws EntityFoundException {
+		ProjectDomain proj = projRepo.findByProjectNameAndDomainName(projectName, domainName);
+		try {
+			Where where = findById(domainId, domainName);
+			boolean isEmpty = cassandraTemplate.getCqlOperations().queryForList(where).isEmpty();
+			if (proj != null && !isEmpty) {
+				com.datastax.driver.core.querybuilder.Delete.Where delete = QueryBuilder.delete().from(domainName).where(QueryBuilder.eq("id", domainId))
+						.and(QueryBuilder.eq("project_id", proj.getId()));
+				return cassandraTemplate.getCqlOperations().execute(delete);
+			}
+		}catch(DataIntegrityViolationException e) {
+			throw new EntityFoundException(e.getMessage());
+		}
+		return false;
 
 	}
 
