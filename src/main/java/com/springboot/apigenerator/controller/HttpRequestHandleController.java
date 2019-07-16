@@ -69,7 +69,7 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping(value = "/{projectName}/{domainName}", produces = "application/json")
+	@PostMapping(value = "/{projectName}/{domainName}", produces = "application/json",consumes="applciation/json")
 	public ResponseEntity<ResponseMessage> saveRecord(@RequestBody RequestPayload reqPayload,
 			@PathVariable String projectName, @PathVariable String domainName) throws Exception {
 		if (httpRequestService.insertRecord(reqPayload, projectName, domainName)) {
@@ -96,6 +96,25 @@ public class HttpRequestHandleController {
 		List<Map<String, Object>> result = httpRequestService.getRecordByID(projName, domainName, domainId);
 		return new ResponseEntity<ResponseMessage>(this.res.setMessage(listmapToJsonString(result), true),
 				HttpStatus.OK);
+	}
+	
+	/**
+	 * Function to update record.
+	 * @param projectName
+	 * @param domainName
+	 * @param domainId
+	 * @param reqPayload
+	 * @return
+	 */
+	@PostMapping(value ="/{projectName}/{domainName}/{domainId}",produces="application/json",consumes="application/json")
+	public ResponseEntity<ResponseMessage> updateRecord(@PathVariable String projectName,@PathVariable String domainName,@PathVariable UUID domainId,@RequestBody RequestPayload reqPayload ){
+		if(	httpRequestService.updateRecord(reqPayload, projectName, domainName, domainId)) {
+			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully updated record", true),
+					HttpStatus.CREATED);
+		}
+		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to update record", false),
+				HttpStatus.BAD_REQUEST);
+		
 	}
 
 	/**
