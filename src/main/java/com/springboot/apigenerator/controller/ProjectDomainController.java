@@ -1,5 +1,7 @@
 package com.springboot.apigenerator.controller;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,32 +18,32 @@ import com.springboot.apigenerator.service.ProjectDomainService;
 
 @RestController
 public class ProjectDomainController {
-	
+
 	private Logger logger = LoggerFactory.getLogger(ProjectDomainController.class);
-	
+
 	@Autowired
 	private ProjectDomainService projectService;
-	
+
 	private ResponseMessage res;
 
 	public ProjectDomainController() {
 		this.res = new ResponseMessage();
 	}
 
-	
-	@PostMapping(value="/createProject",consumes="application/json",produces="application/json")
-	public ResponseEntity<ResponseMessage> createProject(@RequestBody ProjectDomain project) throws EntityFoundException{		
-		if(projectService.createProjectDomain(project)) {
+	@PostMapping(value = "/createProject", consumes = "application/json", produces = "application/json")
+	public ResponseEntity<ResponseMessage> createProject(@Valid @RequestBody ProjectDomain project)
+			throws EntityFoundException {
+		if (projectService.createProjectDomain(project)) {
 			logger.info("Successfully created project");
-			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully created project",true), HttpStatus.CREATED);
-			
-		}else {
+			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully created project", true),
+					HttpStatus.CREATED);
+
+		} else {
 			logger.error("Unable to create user account");
 			return new ResponseEntity<ResponseMessage>(
-					this.res.setMessage("Project/domain already exists.Cannot create",false),
-					HttpStatus.BAD_REQUEST);
+					this.res.setMessage("Project/domain already exists.Cannot create", false), HttpStatus.BAD_REQUEST);
 		}
-		
+
 	}
 
 }
