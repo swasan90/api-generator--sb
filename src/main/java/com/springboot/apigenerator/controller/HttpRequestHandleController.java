@@ -70,9 +70,9 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping(value = "/{projectName}/{domainName}", consumes = "applciation/json", produces = "application/json")
-	public ResponseEntity<ResponseMessage> saveRecord(@RequestBody RequestPayload reqPayload,
-			@PathVariable String projectName, @PathVariable String domainName) throws Exception {
+	@PostMapping(value = "/{projectName}/{domainName}", consumes = "application/json", produces = "application/json")
+	public ResponseEntity<ResponseMessage> saveRecord(@PathVariable String projectName, @PathVariable String domainName,@RequestBody RequestPayload reqPayload) throws Exception {
+		System.out.println("printing payload in post "+reqPayload);
 		if (httpRequestService.insertRecord(reqPayload, projectName, domainName)) {
 			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully inserted new record", true),
 					HttpStatus.CREATED);
