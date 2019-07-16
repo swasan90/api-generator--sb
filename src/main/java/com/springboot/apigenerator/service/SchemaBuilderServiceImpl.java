@@ -3,18 +3,31 @@
  */
 package com.springboot.apigenerator.service;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.exceptions.QueryValidationException;
+import com.datastax.driver.core.schemabuilder.Create;
+import com.datastax.driver.core.schemabuilder.SchemaBuilder;
+import com.datastax.driver.core.schemabuilder.SchemaStatement;
+import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.FieldWrapper;
 import com.springboot.apigenerator.model.ProjectDomain;
-import com.springboot.apigenerator.model.SchemaBuilder;
+import com.springboot.apigenerator.model.SchemaGenerator;
+import com.springboot.apigenerator.model.SchemaMapping;
 import com.springboot.apigenerator.repository.ProjectDomainRepository;
+import com.springboot.apigenerator.repository.SchemaRepository;
 
 @Service("schemaBuilderService")
 public class SchemaBuilderServiceImpl implements SchemaBuilderService {
@@ -25,38 +38,72 @@ public class SchemaBuilderServiceImpl implements SchemaBuilderService {
 	private ProjectDomainRepository projectDomainRepo;
 
 	@Autowired
+	private SchemaRepository schemaRepo;
+
+	@Autowired
 	private CassandraOperations cassandraTemplate;
+
+	@Value("${cassandra.keyspace}")
+	private String keySpaceName;
 
 	/**
 	 * Function to implement create schema method.
+	 * 
 	 * @return boolean
-	 *   
+	 * @throws EntityFoundException
+	 * 
 	 */
 	@Override
-	public boolean createSchemaForDomain(SchemaBuilder schema) {
-		Optional<ProjectDomain> project = projectDomainRepo.findById(schema.getProjectId());
-		if (project.isPresent()) {
+	@Transactional
+	public boolean createSchemaForDomain(SchemaGenerator schemaBuilder) {
+		Optional<ProjectDomain> project = projectDomainRepo.findById(schemaBuilder.getProjectId());
+		try {
+			if (project.isPresent()) {
 
-			logger.info("Constructing Query");
-			StringBuilder fields = new StringBuilder();
+				// Declaring Map to store fields and field data type.
+				Map<String, DataType> fieldMap = new LinkedHashMap<>();
 
-			// Constructing field name and field type as single string using string builder.
-			for (FieldWrapper field : schema.getFields()) {
-				fields.append(field.getFieldName()).append(" ").append(findFieldType(field)).append(",");
+				logger.info("Constructing Query");
+
+				// Constructing cql query to create table.
+				Create createQuery = constructCqlQuery(project.get());
+
+				// Implementation to persist record in schema mapping table and adding entries
+				// to fieldMap.
+				for (FieldWrapper field : schemaBuilder.getFields()) {
+					
+					//Writing entries on map.
+					logger.info("Starting to write entries on map");
+					fieldMap.put(field.getFieldName(), findFieldType(field));
+					logger.info("Finished writing entries on map");
+					
+					 
+					SchemaMapping schema = new SchemaMapping();
+					//Setters
+					schema.setProjectId(project.get().getId());
+					schema.setColumnName(field.getFieldName());
+					schema.setDataType(field.getFieldType());
+
+					schemaRepo.save(schema);
+					logger.info("Persisting schema mapping completed");
+				}
+
+				// Constructing query to add dynamic columns to existing create statement.
+				Create cqlQuery = addDynamicColumns(createQuery, fieldMap);
+
+				// Constructing index query to create index on cluster key.
+				SchemaStatement indexQuery = createIndexOnClusterKey("id", project.get().getDomainName());
+
+				// Executing query statements via cassandra operations.
+				cassandraTemplate.getCqlOperations().execute(cqlQuery.toString());
+				return cassandraTemplate.getCqlOperations().execute(indexQuery);
+
 			}
-
-			// Constructing cql query to create table.
-			StringBuilder cqlQuery = constructCqlQuery(project.get(), fields);
-
-			// Creating table using cassandra template.
-			cassandraTemplate.getCqlOperations().execute(cqlQuery.toString());
-
-			logger.info("created table");
-			return true;
-		} else {
-			logger.error("No project object exists with the project id " + project.get().getId());
-			return false;
+		} catch (QueryValidationException e) {
+			throw new RuntimeException(e.getMessage());
 		}
+
+		return false;
 
 	}
 
@@ -66,22 +113,18 @@ public class SchemaBuilderServiceImpl implements SchemaBuilderService {
 	 * @param field
 	 * @return fieldType
 	 */
-	private String findFieldType(FieldWrapper field) {
-		String fieldType;
-		switch (field.getFieldType()) {
+	private DataType findFieldType(FieldWrapper field) {
+		DataType fieldType = null;
+		switch (field.getFieldType().toLowerCase()) {
 		case "text":
-			fieldType = "text";
+			fieldType = DataType.text();
 			break;
 		case "number":
-			fieldType = "int";
+			fieldType = DataType.cint();
 			break;
 		case "boolean":
-			fieldType = "boolean";
+			fieldType = DataType.cboolean();
 			break;
-		default:
-			fieldType = "Invalid datatype";
-			break;
-
 		}
 		return fieldType;
 	}
@@ -93,10 +136,43 @@ public class SchemaBuilderServiceImpl implements SchemaBuilderService {
 	 * @param fields
 	 * @return cqlQuery
 	 */
-	private StringBuilder constructCqlQuery(ProjectDomain project, StringBuilder fields) {
-		StringBuilder cqlQuery = new StringBuilder();
-		cqlQuery.append("CREATE TABLE ").append(project.getDomainName().toLowerCase())
-				.append("(project_id UUID, id UUID,").append(fields).append("PRIMARY KEY(project_id,id))");
-		return cqlQuery;
+	private Create constructCqlQuery(ProjectDomain project) {
+		Create create = SchemaBuilder.createTable(keySpaceName, project.getDomainName().toLowerCase())
+				.addPartitionKey("project_id", DataType.uuid()).addClusteringColumn("id", DataType.uuid())
+				.ifNotExists();
+		logger.info("Construction of create statement completed");
+		return create;
 	}
+
+	/**
+	 * Function to construct query to add dynamic columns.
+	 * 
+	 * @param query
+	 * @param map
+	 * @return
+	 */
+	private Create addDynamicColumns(Create query, Map<String, DataType> map) {
+		logger.info("Starting construction of dynamic column query");
+		for (Entry<String, DataType> entry : map.entrySet()) {
+			query = query.addColumn(entry.getKey(), entry.getValue()).ifNotExists();
+		}
+		logger.info("Completed construction of dynamic column query");
+		return query;
+	}
+
+	/**
+	 * Function to create index query to create index on cluster key.
+	 * 
+	 * @param field
+	 * @param tableName
+	 * @return
+	 */
+	private SchemaStatement createIndexOnClusterKey(String field, String tableName) {
+		logger.info("Starting construction of create index query");
+		SchemaStatement indexQuery = SchemaBuilder.createIndex("id_idx").onTable(keySpaceName, tableName)
+				.andColumn(field);
+		logger.info("Completed construction of create index query");
+		return indexQuery;
+	}
+
 }
