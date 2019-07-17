@@ -60,10 +60,6 @@
 			<artifactId>json</artifactId>
 			<version>20180813</version>
 		</dependency>
-		
-		<!-- <dependency> <groupId>com.google.code.gson</groupId> <artifactId>gson</artifactId> 
-			<scope>compile</scope> </dependency> -->
-
 		<!-- <dependency> <groupId>com.datastax.cassandra</groupId> <artifactId>cassandra-driver-core</artifactId> 
 			<exclusions> <exclusion> <groupId>io.dropwizard.metrics</groupId> <artifactId>metrics-core</artifactId> 
 			</exclusion> </exclusions> </dependency> <dependency> <groupId>org.cassandraunit</groupId> 
