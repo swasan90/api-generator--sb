@@ -1,5 +1,6 @@
 package com.springboot.apigenerator.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MultiValuedMap;
@@ -116,6 +117,11 @@ public class ProjectDomainServiceImpl implements ProjectDomainService {
 		default:
 			return "Invalid method type";
 		}
+	}
+
+	@Override
+	public List<ProjectDomain> getAllDomainsForproject(String projName) {
+		return projectRepo.findByProjectName(projName);		 
 	}
 
 }
