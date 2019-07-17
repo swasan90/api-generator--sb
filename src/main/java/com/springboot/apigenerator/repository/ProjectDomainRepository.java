@@ -1,5 +1,6 @@
 package com.springboot.apigenerator.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.cassandra.repository.AllowFiltering;
@@ -13,4 +14,7 @@ public interface ProjectDomainRepository extends CassandraRepository<ProjectDoma
 	
 	@AllowFiltering
 	ProjectDomain findByProjectNameAndDomainName(String projectName,String domainName);
+	
+	@AllowFiltering
+	List<ProjectDomain> findByProjectName(String projName);
 }
