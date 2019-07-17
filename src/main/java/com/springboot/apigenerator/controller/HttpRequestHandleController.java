@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +23,7 @@ import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.RequestPayload;
 import com.springboot.apigenerator.model.ResponseMessage;
 import com.springboot.apigenerator.service.HttpRequestHandleService;
+import org.springframework.http.MediaType;
 
 /**
  * @author swathy
@@ -52,13 +50,12 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	@GetMapping(value = "/{projectName}/{domainName}", produces = "application/json")
+	@GetMapping(value = "/{projectName}/{domainName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> listAllRecords(@PathVariable String projectName,
 			@PathVariable String domainName) throws JsonProcessingException {
 		List<Map<String, Object>> result = httpRequestService.listAll(projectName, domainName);
 
-		return new ResponseEntity<ResponseMessage>(this.res.setMessage(listmapToJsonString(result), true),
-				HttpStatus.OK);
+		return new ResponseEntity<ResponseMessage>(this.res.setData(result, true), HttpStatus.OK);
 	}
 
 	/**
@@ -70,9 +67,10 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping(value = "/{projectName}/{domainName}", consumes = "application/json", produces = "application/json")
-	public ResponseEntity<ResponseMessage> saveRecord(@PathVariable String projectName, @PathVariable String domainName,@RequestBody RequestPayload reqPayload) throws Exception {
-		System.out.println("printing payload in post "+reqPayload);
+	@PostMapping(value = "/{projectName}/{domainName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ResponseMessage> saveRecord(@PathVariable String projectName, @PathVariable String domainName,
+			@RequestBody RequestPayload reqPayload) throws Exception {
+		System.out.println("printing payload in post " + reqPayload);
 		if (httpRequestService.insertRecord(reqPayload, projectName, domainName)) {
 			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully inserted new record", true),
 					HttpStatus.CREATED);
@@ -91,12 +89,11 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
-	@GetMapping(value = "/{projectName}/{domainName}/{domainId}", produces = "application/json")
+	@GetMapping(value = "/{projectName}/{domainName}/{domainId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> showRecord(@PathVariable(name = "projectName") String projName,
 			@PathVariable String domainName, @PathVariable UUID domainId) throws JsonProcessingException {
 		List<Map<String, Object>> result = httpRequestService.getRecordByID(projName, domainName, domainId);
-		return new ResponseEntity<ResponseMessage>(this.res.setMessage(listmapToJsonString(result), true),
-				HttpStatus.OK);
+		return new ResponseEntity<ResponseMessage>(this.res.setData(result, true), HttpStatus.OK);
 	}
 
 	/**
@@ -107,11 +104,12 @@ public class HttpRequestHandleController {
 	 * @param domainId
 	 * @param reqPayload
 	 * @return
-	 * @throws EntityFoundException 
+	 * @throws EntityFoundException
 	 */
-	@PostMapping(value = "/{projectName}/{domainName}/{domainId}", produces = "application/json", consumes = "application/json")
+	@PostMapping(value = "/{projectName}/{domainName}/{domainId}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> updateRecord(@PathVariable String projectName,
-			@PathVariable String domainName, @PathVariable UUID domainId, @RequestBody RequestPayload reqPayload) throws EntityFoundException {
+			@PathVariable String domainName, @PathVariable UUID domainId, @RequestBody RequestPayload reqPayload)
+			throws EntityFoundException {
 		if (httpRequestService.updateRecord(reqPayload, projectName, domainName, domainId)) {
 			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully updated record", true),
 					HttpStatus.CREATED);
@@ -119,16 +117,17 @@ public class HttpRequestHandleController {
 		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to update record", false),
 				HttpStatus.BAD_REQUEST);
 	}
-	
+
 	/**
 	 * Function to handle delete request
+	 * 
 	 * @param projectName
 	 * @param domainName
 	 * @param domainId
 	 * @return
-	 * @throws EntityFoundException 
+	 * @throws EntityFoundException
 	 */
-	@DeleteMapping(value = "/{projectName}/{domainName}/{domainId}", produces = "application/json", consumes = "application/json")
+	@DeleteMapping(value = "/{projectName}/{domainName}/{domainId}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> deleteRecord(@PathVariable String projectName,
 			@PathVariable String domainName, @PathVariable UUID domainId) throws EntityFoundException {
 		System.out.println("processing delete ");
@@ -138,33 +137,6 @@ public class HttpRequestHandleController {
 		}
 		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to delete record", false),
 				HttpStatus.BAD_REQUEST);
-	}
-
-	/**
-	 * Function to convert list of map to json string	
-	 * @param list
-	 * @return
-	 * @throws JsonProcessingException
-	 */
-	private String listmapToJsonString(List<Map<String, Object>> list) throws JsonProcessingException {
-		JSONArray json_arr = new JSONArray();
-		if (list != null) {
-			for (Map<String, Object> map : list) {
-				JSONObject json_obj = new JSONObject();
-				for (Map.Entry<String, Object> entry : map.entrySet()) {
-					String key = entry.getKey();
-					Object value = entry.getValue();
-					try {
-						json_obj.put(key, value);
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				json_arr.put(json_obj);
-			}
-		}
-		return json_arr.toString();
 	}
 
 }

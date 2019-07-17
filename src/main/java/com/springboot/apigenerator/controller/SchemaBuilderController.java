@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.springboot.apigenerator.model.ResponseMessage;
 import com.springboot.apigenerator.model.SchemaGenerator;
 import com.springboot.apigenerator.service.SchemaBuilderService;
+import org.springframework.http.MediaType;
 
 /**
  * @author swathy
@@ -43,7 +44,7 @@ public class SchemaBuilderController {
 	 * 
 	 *  
 	 */
-	@PostMapping(value="/buildSchema",consumes="application/json",produces="application/json")
+	@PostMapping(value="/buildSchema",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> buildSchema(@Valid @RequestBody SchemaGenerator schema) {
 		if(schemaBuilderService.createSchemaForDomain(schema)) {
 			logger.info("Successfully created table for the given domain ");
