@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ProjectDomain;
+import com.springboot.apigenerator.model.ServiceReponseMessage;
 
 public interface ProjectDomainService {
 
-	boolean createProjectDomain(ProjectDomain projectDomain) throws EntityFoundException;
+	ServiceReponseMessage createProjectDomain(ProjectDomain projectDomain) throws EntityFoundException;
 
 	List<ProjectDomain> getAllDomainsForproject(String projectNameO);
 

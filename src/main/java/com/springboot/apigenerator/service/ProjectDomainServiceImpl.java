@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ApiEndPoints;
 import com.springboot.apigenerator.model.ProjectDomain;
+import com.springboot.apigenerator.model.ServiceReponseMessage;
 import com.springboot.apigenerator.repository.ApiEndPointsRepository;
 import com.springboot.apigenerator.repository.ProjectDomainRepository;
 
@@ -31,20 +32,22 @@ public class ProjectDomainServiceImpl implements ProjectDomainService {
 
 	@Override
 	@Transactional
-	public boolean createProjectDomain(ProjectDomain projectDomain) throws EntityFoundException {
+	public ServiceReponseMessage createProjectDomain(ProjectDomain projectDomain) throws EntityFoundException {
 		ProjectDomain project = projectRepo.findByProjectNameAndDomainName(projectDomain.getProjectName(),
 				projectDomain.getDomainName());
+		ServiceReponseMessage res = new ServiceReponseMessage();
 		try {
 			if (project == null) {
 				ProjectDomain proj = new ProjectDomain(projectDomain.getProjectName(), projectDomain.getDomainName());
-				projectRepo.save(proj);
+				ProjectDomain data = projectRepo.save(proj);
 				logger.info("Created Project and domain");
 				
 				constructEndPointsMap(proj);
-				return true;
+				return res.setResponseObj(data, true);
+				
 			} else {
 				logger.error("Unable to create project and domain with the given name");
-				return false;
+				return res.setResponseObj(null, false);
 			}
 		} catch (DataIntegrityViolationException e) {
 			logger.error("Catching Exception " + e.getMessage());
