@@ -10,7 +10,7 @@ import com.springboot.apigenerator.model.RequestPayload;
 public interface HttpRequestHandleService  {
 	
 	//List all records.
-	<T> List<Map<String, Object>> listAll(String project_name,String domain_name);
+	List<Map<String, Object>> listAll(String project_name,String domain_name);
 	
 	//Persist record.
 	boolean insertRecord(RequestPayload payload,String projectName,String domainName) throws Exception;
