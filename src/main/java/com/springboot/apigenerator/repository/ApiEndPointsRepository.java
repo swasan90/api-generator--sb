@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package com.springboot.apigenerator.repository;
 
 import java.util.UUID;
@@ -7,7 +10,11 @@ import org.springframework.stereotype.Repository;
 
 import com.springboot.apigenerator.model.ApiEndPoints;
 
+/**
+ * @author swathy
+ *
+ */
 @Repository
-public interface ApiEndPointsRepository extends CassandraRepository<ApiEndPoints,UUID> {
+public interface ApiEndPointsRepository extends CassandraRepository<ApiEndPoints,UUID>{
 
 }
