@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,6 @@ import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.RequestPayload;
 import com.springboot.apigenerator.model.ResponseMessage;
 import com.springboot.apigenerator.service.HttpRequestHandleService;
-import org.springframework.http.MediaType;
 
 /**
  * @author swathy
@@ -52,9 +52,8 @@ public class HttpRequestHandleController {
 	 */
 	@GetMapping(value = "/{projectName}/{domainName}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> listAllRecords(@PathVariable String projectName,
-			@PathVariable String domainName) throws JsonProcessingException {
+			@PathVariable String domainName) {
 		List<Map<String, Object>> result = httpRequestService.listAll(projectName, domainName);
-
 		return new ResponseEntity<ResponseMessage>(this.res.setData(result, true), HttpStatus.OK);
 	}
 
@@ -72,10 +71,10 @@ public class HttpRequestHandleController {
 			@RequestBody RequestPayload reqPayload) throws Exception {
 		System.out.println("printing payload in post " + reqPayload);
 		if (httpRequestService.insertRecord(reqPayload, projectName, domainName)) {
-			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully inserted new record", true),
+			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully inserted new record", true,null),
 					HttpStatus.CREATED);
 		}
-		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to persist record", false),
+		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to persist record", false,null),
 				HttpStatus.BAD_REQUEST);
 
 	}
@@ -111,10 +110,10 @@ public class HttpRequestHandleController {
 			@PathVariable String domainName, @PathVariable UUID domainId, @RequestBody RequestPayload reqPayload)
 			throws EntityFoundException {
 		if (httpRequestService.updateRecord(reqPayload, projectName, domainName, domainId)) {
-			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully updated record", true),
+			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully updated record", true,null),
 					HttpStatus.CREATED);
 		}
-		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to update record", false),
+		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to update record", false,null),
 				HttpStatus.BAD_REQUEST);
 	}
 
@@ -132,10 +131,10 @@ public class HttpRequestHandleController {
 			@PathVariable String domainName, @PathVariable UUID domainId) throws EntityFoundException {
 		System.out.println("processing delete ");
 		if (httpRequestService.deleteRecord(projectName, domainName, domainId)) {
-			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully deleted record", true),
+			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully deleted record", true,null),
 					HttpStatus.CREATED);
 		}
-		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to delete record", false),
+		return new ResponseEntity<ResponseMessage>(this.res.setMessage("Unable to delete record", false,null),
 				HttpStatus.BAD_REQUEST);
 	}
 
