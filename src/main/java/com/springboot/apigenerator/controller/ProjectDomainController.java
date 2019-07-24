@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ProjectDomain;
 import com.springboot.apigenerator.model.ResponseMessage;
+import com.springboot.apigenerator.model.ServiceReponseMessage;
 import com.springboot.apigenerator.service.ProjectDomainService;
 
 @RestController
@@ -39,21 +40,23 @@ public class ProjectDomainController {
 	/**
 	 * Function to handle create project and domain request.
 	 * @param project
+	 * @param resData 
 	 * @return
 	 * @throws EntityFoundException
 	 */
 	@PostMapping(value = "/createProject", consumes = MediaType.APPLICATION_JSON_VALUE, produces =MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> createProject(@Valid @RequestBody ProjectDomain project)
 			throws EntityFoundException {
-		if (projectService.createProjectDomain(project)) {
+		ServiceReponseMessage resData = projectService.createProjectDomain(project);
+		if (resData.getStatus()) {
 			logger.info("Successfully created project");
-			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully created project", true),
+			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully created project", resData.getStatus(),resData.getResponseObj()),
 					HttpStatus.CREATED);
 
 		} else {
 			logger.error("Unable to create user account");
 			return new ResponseEntity<ResponseMessage>(
-					this.res.setMessage("Project/domain already exists.Cannot create", false), HttpStatus.BAD_REQUEST);
+					this.res.setMessage("Project/domain already exists.Cannot create", resData.getStatus(),null), HttpStatus.BAD_REQUEST);
 		}
 
 	}
