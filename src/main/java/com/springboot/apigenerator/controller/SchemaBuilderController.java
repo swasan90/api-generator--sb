@@ -48,12 +48,12 @@ public class SchemaBuilderController {
 	public ResponseEntity<ResponseMessage> buildSchema(@Valid @RequestBody SchemaGenerator schema) {
 		if(schemaBuilderService.createSchemaForDomain(schema)) {
 			logger.info("Successfully created table for the given domain ");
-			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully created table",true), HttpStatus.CREATED);
+			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully created table",true,null), HttpStatus.CREATED);
 			
 		}else {
 			logger.error("Unable to create table");
 			return new ResponseEntity<ResponseMessage>(
-					this.res.setMessage("Project/domain doesn't exists.Unable to create",false),
+					this.res.setMessage("Project/domain doesn't exists.Unable to create",false,null),
 					HttpStatus.BAD_REQUEST);
 		}
 	}
