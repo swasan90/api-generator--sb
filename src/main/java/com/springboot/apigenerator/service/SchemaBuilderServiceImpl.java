@@ -169,7 +169,7 @@ public class SchemaBuilderServiceImpl implements SchemaBuilderService {
 	 */
 	private SchemaStatement createIndexOnClusterKey(String field, String tableName) {
 		logger.info("Starting construction of create index query");
-		SchemaStatement indexQuery = SchemaBuilder.createIndex("id_idx").onTable(keySpaceName, tableName)
+		SchemaStatement indexQuery = SchemaBuilder.createIndex(tableName+"_"+"id_idx").onTable(keySpaceName, tableName)
 				.andColumn(field);
 		logger.info("Completed construction of create index query");
 		return indexQuery;
