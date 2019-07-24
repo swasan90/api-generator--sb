@@ -51,7 +51,7 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 	 * @param projectName,domainName
 	 */
 	@Override
-	public <T> List<Map<String, Object>> listAll(String projectName, String domainName) {
+	public List<Map<String, Object>> listAll(String projectName, String domainName) {
 		Select select = QueryBuilder.select().from(domainName);
 		return cassandraTemplate.getCqlOperations().queryForList(select);
 	}
