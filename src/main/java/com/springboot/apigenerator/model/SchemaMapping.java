@@ -16,7 +16,7 @@ import lombok.Data;
  * @author swathy
  *
  */
-@Table
+@Table(value="schema_mapping")
 @Data
 public class SchemaMapping {
 

@@ -28,7 +28,7 @@ public class SchemaGenerator implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	@PrimaryKeyColumn(name="project_id",ordinal=0,type = PrimaryKeyType.PARTITIONED)
+	@PrimaryKeyColumn(value="project_id",ordinal=0,type = PrimaryKeyType.PARTITIONED)
 	private UUID projectId;
 	
 	@PrimaryKeyColumn(ordinal=0,type=PrimaryKeyType.CLUSTERED)

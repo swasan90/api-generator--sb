@@ -22,13 +22,16 @@ public class ResponseMessage {
 	private boolean status;
 	
 	private List<?> data;
+	
+	private Object resObj;
 
 	public ResponseMessage() {
 	}
 
-	public ResponseMessage setMessage(String message, boolean status) {
+	public ResponseMessage setMessage(String message, boolean status,Object resObj) {
 		this.message = message;
-		this.status = status;
+		this.status = status;		
+		this.resObj = resObj;
 		return this;
 	}
 
@@ -37,7 +40,7 @@ public class ResponseMessage {
 		return this;
 	}
 	
-	public ResponseMessage setData(List<?> data,boolean status) {
+	public ResponseMessage setData(List<?> data,boolean status) {		 
 		this.data = data;
 		this.status = status;
 		return this;
@@ -54,5 +57,11 @@ public class ResponseMessage {
 	public String getMessage() {
 		return message;
 	}
+	
+	public Object getResObj() {
+		return resObj;
+	}
+	
+	 
 
 }

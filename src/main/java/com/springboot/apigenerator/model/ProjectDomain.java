@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import javax.validation.constraints.NotBlank;
 
+import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -20,18 +21,18 @@ import lombok.Data;
  * @author swathy
  *
  */
-@Table
+@Table(value="project_domain")
 @Data
 public class ProjectDomain {
 	
 	@PrimaryKey	 
 	private UUID id;
 	
-//	@PrimaryKeyColumn(name="project_name",ordinal=0,type=PrimaryKeyType.PARTITIONED)
+	@Column(value="project_name")
 	@NotBlank(message="Project name cannot be empty")
 	private String projectName;	
 	
-//	@PrimaryKeyColumn(name="domain_name",ordinal=0,type=PrimaryKeyType.CLUSTERED)
+	@Column(value="domain_name")
 	@NotBlank(message="Domain name cannot be empty")
 	private String domainName;
 	
