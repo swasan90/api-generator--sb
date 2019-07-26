@@ -1,6 +1,8 @@
 package com.springboot.apigenerator.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ProjectDomain;
+import com.springboot.apigenerator.model.ProjectGroupBy;
 import com.springboot.apigenerator.model.ResponseMessage;
 import com.springboot.apigenerator.model.ServiceReponseMessage;
 import com.springboot.apigenerator.service.ProjectDomainService;
@@ -50,13 +53,13 @@ public class ProjectDomainController {
 		ServiceReponseMessage resData = projectService.createProjectDomain(project);
 		if (resData.getStatus()) {
 			logger.info("Successfully created project");
-			return new ResponseEntity<ResponseMessage>(this.res.setMessage("Successfully created project", resData.getStatus(),resData.getResponseObj()),
+			return new ResponseEntity<ResponseMessage>(this.res.setData("Successfully created project", resData.getStatus(),resData.getResponseObj()),
 					HttpStatus.CREATED);
 
 		} else {
 			logger.error("Unable to create user account");
 			return new ResponseEntity<ResponseMessage>(
-					this.res.setMessage("Project/domain already exists.Cannot create", resData.getStatus(),null), HttpStatus.BAD_REQUEST);
+					this.res.setData("Project/domain already exists.Cannot create", resData.getStatus(),null), HttpStatus.BAD_REQUEST);
 		}
 
 	}
@@ -65,6 +68,15 @@ public class ProjectDomainController {
 	public ResponseEntity<ResponseMessage> listDomains(@PathVariable String projectName) throws JsonProcessingException{
 		List<ProjectDomain> result = projectService.getAllDomainsForproject(projectName);				 
 		return new ResponseEntity<ResponseMessage>(this.res.setData(result, true),HttpStatus.OK);
-	}
+	} 
+	
+	
+
+	@GetMapping(value="/getProjectList",produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ResponseMessage> listProjects() {
+		Set<ProjectGroupBy> result = projectService.getAllProjects();	 		 
+		return new ResponseEntity<ResponseMessage>(this.res.setData(result,true),HttpStatus.OK);
+	} 
+	
 
 }
