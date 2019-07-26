@@ -25,10 +25,10 @@ import lombok.Data;
 @Data
 public class ProjectDomain {
 	
-	@PrimaryKey	 
+	@PrimaryKey 
 	private UUID id;
 	
-	@Column(value="project_name")
+	@ Column(value="project_name")	
 	@NotBlank(message="Project name cannot be empty")
 	private String projectName;	
 	
@@ -43,5 +43,10 @@ public class ProjectDomain {
 		this.projectName = project_name;
 		this.domainName = domain_name;
 		this.id = UUIDs.timeBased();	
+	};
+	
+	public ProjectDomain(String project_name) {
+		super();		 
+		this.projectName = project_name;		 
 	};
 }
