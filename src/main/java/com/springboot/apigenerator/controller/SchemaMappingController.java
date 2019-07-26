@@ -32,7 +32,7 @@ public class SchemaMappingController {
 		this.res = new ResponseMessage();
 	}
 	
-	@GetMapping(value="getSchemaData/{id}")
+	@GetMapping(value="getColumnData/{id}")
 	public ResponseEntity<ResponseMessage> getSchemaData(@PathVariable String id) {		
 		Set<String> result = schemaService.getSchemaColumns(UUID.fromString(id));
 		return new ResponseEntity<ResponseMessage>(this.res.setData(result, true),HttpStatus.OK);		
