@@ -1,7 +1,13 @@
 package com.springboot.apigenerator.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
@@ -15,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ApiEndPoints;
 import com.springboot.apigenerator.model.ProjectDomain;
+import com.springboot.apigenerator.model.ProjectGroupBy;
 import com.springboot.apigenerator.model.ServiceReponseMessage;
 import com.springboot.apigenerator.repository.ApiEndPointsRepository;
 import com.springboot.apigenerator.repository.ProjectDomainRepository;
@@ -121,10 +128,31 @@ public class ProjectDomainServiceImpl implements ProjectDomainService {
 			return "Invalid method type";
 		}
 	}
-
+	
+	/**
+	 * Function to get all domains for project
+	 * @param projName
+	 * @return List
+	 */
 	@Override
 	public List<ProjectDomain> getAllDomainsForproject(String projName) {
 		return projectRepo.findByProjectName(projName);		 
+	}
+	
+	/**
+	 * Function to list all projects and group by project name
+	 * @return Map
+	 */
+	@Override
+	public Set<ProjectGroupBy> getAllProjects() {
+		//Map<String, List<ProjectDomain>> result = projectRepo.findAll().stream().collect(Collectors.groupingBy(ProjectDomain::getProjectName));
+		Set<ProjectGroupBy> projects = new HashSet<ProjectGroupBy>();		
+		for(ProjectDomain project: projectRepo.findAll()) {	
+			ProjectGroupBy projObj = new ProjectGroupBy(project.getProjectName(),this.getAllDomainsForproject(project.getProjectName()));			
+			projects.add(projObj);
+		}
+		 
+		return projects;
 	}
 
 }
