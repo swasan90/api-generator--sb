@@ -72,23 +72,6 @@ public class ResponseMessage {
 	public Set<?> getDataSet() {
 		return dataSet;
 	}
-	
-	
-	
-//	
-//	public ResponseMessage setStatus(boolean status) {
-//		this.status = status;
-//		return this;
-//	}
-	
-//	public ResponseMessage setMessage(String message, boolean status,Object resObj) {
-//	this.message = message;
-//	this.status = status;		
-//	this.resObj = resObj;
-//	return this;
-//}
- 
-//	
-	 
+ 	
 
 }
