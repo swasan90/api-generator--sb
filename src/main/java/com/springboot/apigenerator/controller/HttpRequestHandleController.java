@@ -126,7 +126,7 @@ public class HttpRequestHandleController {
 	 * @return
 	 * @throws EntityFoundException
 	 */
-	@DeleteMapping(value = "/{projectName}/{domainName}/{domainId}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/{projectName}/{domainName}/{domainId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ResponseMessage> deleteRecord(@PathVariable String projectName,
 			@PathVariable String domainName, @PathVariable UUID domainId) throws EntityFoundException {
 		System.out.println("processing delete ");
