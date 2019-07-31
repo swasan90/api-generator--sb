@@ -3,13 +3,13 @@
  */
 package com.springboot.apigenerator.validation;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.springboot.apigenerator.model.ProjectDomain;
 import com.springboot.apigenerator.model.RequestPayload;
 import com.springboot.apigenerator.model.SchemaMapping;

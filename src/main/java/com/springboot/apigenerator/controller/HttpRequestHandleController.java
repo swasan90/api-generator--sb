@@ -24,7 +24,6 @@ import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.RequestPayload;
 import com.springboot.apigenerator.model.ResponseMessage;
 import com.springboot.apigenerator.service.HttpRequestHandleService;
-import com.springboot.apigenerator.validation.ValidPayloadImpl;
 
 /**
  * @author swathy

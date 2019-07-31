@@ -4,7 +4,6 @@
 package com.springboot.apigenerator.model;
 
 import java.util.List;
-import java.util.Map;
 
 import lombok.Data;
 
