@@ -26,6 +26,7 @@ import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ProjectDomain;
 import com.springboot.apigenerator.model.RequestPayload;
 import com.springboot.apigenerator.repository.ProjectDomainRepository;
+import com.springboot.apigenerator.validation.ValidPayloadImpl;
 
 /**
  * @author swathy
@@ -41,6 +42,9 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 
 	@Autowired
 	private CassandraOperations cassandraTemplate;
+	
+	@Autowired
+	private ValidPayloadImpl validPayload;
 
 	@Value("${cassandra.keyspace}")
 	private String keySpaceName;
@@ -67,7 +71,7 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 		ProjectDomain proj = projRepo.findByProjectNameAndDomainName(projectName, domainName);
 		logger.info("Entering try catch block");
 		try {
-			if (proj != null) {
+			if (proj != null && validPayload.isValid(payload, projectName, domainName)) {
 				payload.setProjectId(proj.getId());
 				Insert insert = QueryBuilder.insertInto(domainName).values(payload.getFieldNames(),
 						payload.getFieldValues());
@@ -112,7 +116,7 @@ public class HttpRequestHandleServiceImpl implements HttpRequestHandleService {
 		try {
 			Where where = findById(domainId, domainName);
 			boolean isEmpty = cassandraTemplate.getCqlOperations().queryForList(where).isEmpty();
-			if (proj != null && !isEmpty) {
+			if (proj != null && !isEmpty && validPayload.isValid(payload, projectName, domainName)) {
 				Update update = QueryBuilder.update(keySpaceName, domainName);
 				for (Entry<String, Object> entry : payload.attributes.entrySet()) {
 					update.with().and(QueryBuilder.set(entry.getKey(), entry.getValue()));
