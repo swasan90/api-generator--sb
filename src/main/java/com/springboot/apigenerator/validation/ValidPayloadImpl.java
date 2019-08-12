@@ -40,7 +40,9 @@ public class ValidPayloadImpl {
 				int status = 0;				 
 				if (item.getColumnName().trim().contains(entry.getKey())) {					 
 					status = 1;
-					if (status == 1 && item.getDataType().compareTo("number") == 0) {
+					if (status == 1 && item.getDataType().compareTo("number") == 0 && attributes.get(item.getColumnName()) instanceof String) {
+						System.out.println(item.getColumnName());
+						System.out.println(attributes.get(item.getColumnName()));
 						attributes.put(item.getColumnName(),
 								Integer.parseInt((String) attributes.get(item.getColumnName())));
 					}					
