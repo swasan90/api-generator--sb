@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 
 import com.springboot.apigenerator.exceptions.EntityFoundException;
 import com.springboot.apigenerator.model.ProjectDomain;
@@ -58,8 +59,7 @@ public class ProjectDomainServiceUnitTest {
 		ProjectDomain p2 = new ProjectDomain("geoscience","field_density_report");	 
 		
 		this.projects.add(p1);
-		this.projects.add(p2);
-		 
+		this.projects.add(p2);		
 	}
 	
 	@AfterEach
