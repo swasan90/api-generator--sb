@@ -37,21 +37,20 @@ public class ValidPayloadImpl {
 		List<SchemaMapping> schema = schemaRepo.findByProjectId(project.getId());
 		for (Entry<String, Object> entry : attributes.entrySet()) {
 			for (SchemaMapping item : schema) {
-				int status = 0;				 
-				if (item.getColumnName().trim().contains(entry.getKey())) {					 
+				int status = 0;
+				if (item.getColumnName().trim().contains(entry.getKey())) {
 					status = 1;
-					if (status == 1 && item.getDataType().compareTo("number") == 0 && attributes.get(item.getColumnName()) instanceof String) {
-						System.out.println(item.getColumnName());
-						System.out.println(attributes.get(item.getColumnName()));
+					if (status == 1 && item.getDataType().compareTo("number") == 0
+							&& attributes.get(item.getColumnName()) instanceof String) {
+//						System.out.println(item.getColumnName());
+//						System.out.println(attributes.get(item.getColumnName()));
 						attributes.put(item.getColumnName(),
 								Integer.parseInt((String) attributes.get(item.getColumnName())));
-					}					
+					}
 					flag = status;
-				} else {
-					flag = 0;
 				}
 			}
-		}		 
+		}
 		return flag == 1 ? true : false;
 	}
 
