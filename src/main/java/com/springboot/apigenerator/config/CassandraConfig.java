@@ -49,6 +49,8 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
 		cluster.setPort(getPort());	
 		cluster.setClusterName("apiGeneratorCluster");
 		cluster.setKeyspaceCreations(getKeyspaceCreations());
+		cluster.setMetricsEnabled(false);		
+		cluster.setJmxReportingEnabled(false);		
 		LOGGER.info("Cluster created with contact points [" + contactPoints + "] " + "& port [" + port + "].");
 		return cluster;
 	}
