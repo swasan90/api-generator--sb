@@ -3,6 +3,7 @@
  */
 package com.springboot.apigenerator.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,9 @@ import com.springboot.apigenerator.jwt.JWTAuthorizationFilter;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
+	@Value("${spring.allowed.origin}")
+	private String allowedOrigin;
+	
 	/**
 	 * Function to define the cors filter setting.
 	 * 
@@ -36,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);		 
-		config.addAllowedOrigin("http://localhost:4210");
+		config.addAllowedOrigin("allowedOrigin");
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("OPTIONS");
 		config.addAllowedMethod("GET");
