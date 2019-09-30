@@ -6,7 +6,6 @@ package com.springboot.apigenerator.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -40,7 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);		 
-		config.addAllowedOrigin("allowedOrigin");
+		config.addAllowedOrigin(allowedOrigin);
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("OPTIONS");
 		config.addAllowedMethod("GET");
@@ -57,15 +56,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	 */
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable().authorizeRequests()
-					.antMatchers(HttpMethod.GET, "/getToken/:id").permitAll()
+		http.cors().and().csrf().disable().authorizeRequests()				 
 					.anyRequest().authenticated()
 					.and()
 					.sessionManagement()
 					.sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 					.addFilter(new JWTAuthenticationFilter())
-					.addFilter(new JWTAuthorizationFilter(authenticationManager())).sessionManagement()
-					.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+					.addFilter(new JWTAuthorizationFilter(authenticationManager()));
+					 
 
 		http.headers().frameOptions().disable();
 
